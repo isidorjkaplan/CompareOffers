@@ -45,7 +45,7 @@ def plot_yearly(results : List[Result]):
     #plot_values([np.cumsum(headlands), np.cumsum(hrt)], title='Total Cumulative Profits',names=['Headlands', 'HRT'])
     
     plt.subplot(212)
-    plot_values([[np.sum(result.net_cashflow[i:(i+4)]) for i in range(0, len(result.net_cashflow), 4)] for result in results], title='Net Cashflow (yearly, after-tax)', quarterly=False)
+    plot_values([[np.sum(result.net_cashflow[i:(i+4)]) for i in range(0, len(result.net_cashflow), 4)] for result in results], title='Net Savings (yearly)', quarterly=False)
     plt.xlabel("Years")
 
     plt.show()
