@@ -33,7 +33,7 @@ def plot_quarterly(results : List[Result]):
     #plot_values([np.cumsum(headlands), np.cumsum(hrt)], title='Total Cumulative Profits',names=['Headlands', 'HRT'])
     
     plt.subplot(212)
-    plot_values([result.net_cashflow for result in results], title='Net Cashflow (quarterly, after-tax)')
+    plot_values([result.net_cashflow for result in results], title='Net Savings (quarterly)')
     plt.xlabel("Years")
 
     plt.show()
@@ -61,15 +61,7 @@ def plot_yearly(results : List[Result]):
     plt.show()
     pass
 
-def plot_tax_info(results : List[Result]):
-    # All are yearly over time
-    #  <avg tax rates>  <marginal tax rates>    
-    #  <tc before tax>  <tc after tax>
-    # TODO
-    pass
-
 def plot_results(results : List[Result]):
     plot_quarterly(results)
     plot_yearly(results)
-    plot_tax_info(results)
     pass
