@@ -29,29 +29,29 @@ City = namedtuple('City', 'label yearly_col tax_func')
 # FACTORY FUNCTIONS FOR COMMON STUFF
 
 # Create the Bonus representation from a bonus granted yearly in January
-def create_yearly_vested_bonus(label, face_value, yearly_vesting):
+def create_yearly_vested_bonus(face_value, yearly_vesting, label='Vested Bonus'):
     quarterly_vesting = []
     for pct in yearly_vesting:
         quarterly_vesting.extend([pct, 0, 0, 0])
     return Bonus(label, face_value, quarterly_vesting, 4)
 
-def create_sign_bonus(value):
-    return Bonus("Sign Bonus", value, [1.0], None)
+def create_sign_bonus(value, label='Sign Bonus'):
+    return Bonus(label, value, [1.0], None)
 
 # Create a bonus that is granted once per year 
-def create_yearly_cash_bonus(label, value):
+def create_yearly_cash_bonus(value, label='Annual Cash Bonus'):
     return Bonus(label, value, [1.0], 4)
 
-def create_quarterly_uniform_bonus(label, value, vest_quarters):
+def create_quarterly_uniform_bonus(value, vest_quarters, label='Bonus'):
     return Bonus(label, value, [1.0/vest_quarters]*vest_quarters, 1)
 
-def create_base_only_level(label, base):
+def create_base_only_level(base, label='Level'):
     return Level(label, base, [])
 
 # A level with a single bonus (most companies)
-def create_simple_level(label, base, bonus : Union[int,Bonus]):
+def create_simple_level(base, bonus : Union[int,Bonus], label='Level'):
     if not isinstance(bonus, Bonus):
-        bonus = create_yearly_cash_bonus("Annual Cash Bonus", bonus)
+        bonus = create_yearly_cash_bonus(bonus, label)
     return Level(label, base, [bonus])
 
 # Create an offer 
@@ -59,12 +59,10 @@ def create_offer(label, levels : List[Level], promotions : List[int], sign_bonus
     if sign_bonus is not None and not isinstance(sign_bonus, Bonus):
         sign_bonus = create_sign_bonus(sign_bonus)
     return Offer(label, levels, promotions, sign_bonus)
-    pass
 
 # A simple offer containing only one level and simple bonuses
 def create_simple_offer(label, base, bonus: Union[int,Bonus], sign_bonus: Union[int,Bonus]):
     if bonus is not None and not isinstance(bonus, Bonus):
-        bonus = create_yearly_cash_bonus("Annual Cash Bonus", bonus)
-
-    return create_offer(label, [create_simple_level("Level", base, bonus)], [], sign_bonus)
+        bonus = create_yearly_cash_bonus(bonus)
+    return create_offer(label, [create_simple_level(base, bonus)], [], sign_bonus)
 

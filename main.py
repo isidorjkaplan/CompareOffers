@@ -16,34 +16,23 @@ def main():
     params = {
         "start_quarter":2, # Start at beginning of Q3 since graduate then
         "interest_rate":0.05, #Assumed interest rate
-        "years":10, # How many years to simulate
+        "years":3, # How many years to simulate
     } 
 
-
-    # An example of a quant-style offer not modelling any leveling, from levels.fyi
-    citadel_offer = create_simple_offer("Citadel", base=200, bonus=150, sign_bonus=50)
-    # An example of a quant-style offer that vests quarterly, from levels.fyi
-    hrt_offer = create_simple_offer("HRT", base=200, bonus=create_quarterly_uniform_bonus("Quarterly Bonus", 150 / 4, 8), sign_bonus=100)
-
-    # An example of a typical silicon-valley style vested offer with well-defined levels
+    # An example of a typical silicon-valley style vested offer with well-defined levels, from levels.fyi
     google_vest_arr = [0.38, 0.32, 0.20, 0.10]
     google_levels = [
-        create_simple_level("L3", base=145, bonus=create_yearly_vested_bonus("RSU", 50, google_vest_arr)),
-        create_simple_level("L4", base=175, bonus=create_yearly_vested_bonus("RSU", 95, google_vest_arr)),
-        create_simple_level("L5", base=205, bonus=create_yearly_vested_bonus("RSU", 168, google_vest_arr)),
-        create_simple_level("L6", base=248, bonus=create_yearly_vested_bonus("RSU", 300, google_vest_arr)),
+        create_simple_level(label="L3", base=145, bonus=create_yearly_vested_bonus(50, google_vest_arr)),
+        create_simple_level(label="L4", base=175, bonus=create_yearly_vested_bonus(95, google_vest_arr)),
+        create_simple_level(label="L5", base=205, bonus=create_yearly_vested_bonus(168, google_vest_arr)),
+        create_simple_level(label="L6", base=248, bonus=create_yearly_vested_bonus(300, google_vest_arr)),
     ]
-    google_offer = create_offer("Google", google_levels, [1,3,5], sign_bonus=10)
+    # An example of an quarterly-bonus vested offer using numbers for HRT from levels.fyi
     
     results = [
-        #evaluate(hrt_offer, city_jersey, **params),
-        evaluate(hrt_offer, city_nyc   , **params),
-
-        #evaluate(citadel_offer, city_nyc, **params),
-        evaluate(citadel_offer, city_chicago, **params),
-
-        # Evaluating Google living in the Bay area
-        evaluate(google_offer, city_sf,  **params),
+        evaluate(create_simple_offer("HRT", base=200, bonus=create_quarterly_uniform_bonus(150 / 4, 8), sign_bonus=100), city_jersey, **params),
+        
+        evaluate(create_offer("Google", google_levels, [1,3,5], sign_bonus=10), city_sf,  **params),
     ]
 
     plot_results(results)
