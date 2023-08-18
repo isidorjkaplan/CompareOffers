@@ -20,9 +20,9 @@ def main():
     } 
 
 
-    # An example of a quant-style offer not modelling any leveling
+    # An example of a quant-style offer not modelling any leveling, from levels.fyi
     citadel_offer = create_simple_offer("Citadel", base=200, bonus=150, sign_bonus=50)
-    # An example of a quant-style offer that vests quarterly
+    # An example of a quant-style offer that vests quarterly, from levels.fyi
     hrt_offer = create_simple_offer("HRT", base=200, bonus=create_quarterly_uniform_bonus("Quarterly Bonus", 150 / 4, 8), sign_bonus=100)
 
     # An example of a typical silicon-valley style vested offer with well-defined levels
@@ -35,13 +35,12 @@ def main():
     ]
     google_offer = create_offer("Google", google_levels, [1,3,5], sign_bonus=10)
     
-
     results = [
         # Evaluating HRT in both New York versus commuting from Jersey (spoiler alert: live in jersey)
-        evaluate(hrt_offer, city_jersey, **params),
+        #evaluate(hrt_offer, city_jersey, **params),
         evaluate(hrt_offer, city_nyc   , **params),
 
-        evaluate(citadel_offer, city_nyc, **params),
+        #evaluate(citadel_offer, city_nyc, **params),
         evaluate(citadel_offer, city_chicago, **params),
 
         # Evaluating Google living in the Bay area
