@@ -36,7 +36,6 @@ def main():
     google_offer = create_offer("Google", google_levels, [1,3,5], sign_bonus=10)
     
     results = [
-        # Evaluating HRT in both New York versus commuting from Jersey (spoiler alert: live in jersey)
         #evaluate(hrt_offer, city_jersey, **params),
         evaluate(hrt_offer, city_nyc   , **params),
 
