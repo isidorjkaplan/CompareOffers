@@ -47,15 +47,18 @@ def gen_raw_offer_cashflow(offer : Offer, years : int, start_quarter : int = 0) 
         
     return result
 
-# Apply taxes and cost of living to a cashflow
-def apply_costs(result, city : City, start_quarter) -> np.ndarray:
+def apply_taxes(result, city : City) -> np.ndarray:
     result = np.copy(result)
     for pos in range(0, len(result), 4):
         year_slice = result[pos:min((pos+4), len(result))]
         year_slice *= 1-taxes.calc_avg_rate(city.tax_func, np.sum(year_slice))
+    return result
+
+# Apply taxes and cost of living to a cashflow
+def apply_col(result, city : City, start_quarter) -> np.ndarray:
+    result = np.copy(result)
     result[start_quarter:] -= city.yearly_col/4
     return result 
-    pass
 
 # Generate the net-worth of a cash-flow at each time interval under some assumed interest rate
 def calc_future_value(cashflow, interest_rate : float) -> List[float]:
@@ -72,12 +75,13 @@ def calc_future_value(cashflow, interest_rate : float) -> List[float]:
     return result
 
 from collections import namedtuple
-Result = namedtuple('Result', 'offer city net_cashflow net_worth raw_cashflow')
+Result = namedtuple('Result', 'offer city raw_cashflow taxed_cashflow savings_cashflow net_worth')
 
 # Evaluate an offer in a given city under some specified conditions
 def evaluate(offer : Offer, city : City, interest_rate = 0, years : int = 5, start_quarter : int = 0):
     raw_cashflow = gen_raw_offer_cashflow(offer, years, start_quarter)
-    net_cashflow = apply_costs(raw_cashflow, city, start_quarter)
-    net_worth = calc_future_value(net_cashflow, interest_rate)
-    return Result(offer, city, net_cashflow, net_worth, raw_cashflow)
+    taxed_cashflow = apply_taxes(raw_cashflow, city)
+    savings_cashflow = apply_col(taxed_cashflow, city, start_quarter)
+    net_worth = calc_future_value(savings_cashflow, interest_rate)
+    return Result(offer, city, raw_cashflow, taxed_cashflow, savings_cashflow, net_worth)
     pass
