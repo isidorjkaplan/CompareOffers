@@ -49,6 +49,17 @@ cali_tax_table = [
     (677.275, 12.3 / 100)
 ]
 
+# Canada + Ontario Tax Table
+# Quick and dirty aproximation which should be updated
+canada_and_ontario_aproximate_tax_table = [
+    (0, 26.35 / 100),
+    (100, 33.89 / 100),
+    (110, 43.41 / 100),
+    (160, 44.97 / 100),
+    (170, 47.97 / 100),
+    (273, 53.53 / 100)
+]
+
 # Some taxes that are flat income based
 
 nyc_commuter_tax_rate = 0.6 / 100.0
@@ -122,6 +133,9 @@ def calc_jersey_total_tax(income: float):
 
 def calc_cali_total_tax(income: float):
     return calc_cali_state_tax(income) + calc_total_fed_tax(income)
+
+def calc_ontario_total_tax(income: float):
+    return calc_progressive_tax(canada_and_ontario_aproximate_tax_table, income)
 
 # TAX OPERATORS
 

@@ -37,6 +37,7 @@ def plot_results(results : List[Result]):
     #plot_values([np.cumsum(headlands), np.cumsum(hrt)], title='Total Cumulative Profits',names=['Headlands', 'HRT'])
     
     plt.subplot(234)
+    plt.ylabel("$1,000")
     plot_values([annualize(result.raw_cashflow) for result in results], title='Raw TC (yearly)', quarterly=False)
     plt.xlabel("Year")
 
