@@ -137,6 +137,7 @@ def calc_cali_total_tax(income: float):
 def calc_ontario_total_tax(income: float):
     return calc_progressive_tax(canada_and_ontario_aproximate_tax_table, income)
 
+
 # TAX OPERATORS
 
 def calc_marginal_rate(tax_func, income : float):
