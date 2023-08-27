@@ -91,7 +91,7 @@ def scale_offer(offer : Offer, factor : float) -> Offer:
     pass
 
 def scale_city(city : City, factor : float) -> City:
-    return City(city.label, city.yearly_col*factor, lambda x: factor*city.tax_func(x))
+    return City(city.label, city.yearly_col*factor, lambda x: factor*city.tax_func(x/factor))
 
 # Scale all fields of an offer by an scalar multiple, useful for currency conversions
 def scale_result(result : Result, factor : float) -> Result:
