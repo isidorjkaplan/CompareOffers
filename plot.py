@@ -24,7 +24,7 @@ def plot_quarterly(results : List[Result]):
     
     plt.subplot(211)
     plot_values([result.net_worth for result in results], title='Net Worth',names=labels)
-    plt.ylabel("Hundred Thousand USD")
+    plt.ylabel("$1,000 USD")
 
     #plot_values([np.cumsum(headlands), np.cumsum(hrt)], title='Total Cumulative Profits',names=['Headlands', 'HRT'])
     
