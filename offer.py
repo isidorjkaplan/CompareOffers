@@ -42,17 +42,30 @@ def create_sign_bonus(value, label='Sign Bonus'):
 def create_yearly_cash_bonus(value, label='Annual Cash Bonus'):
     return Bonus(label, value, [1.0], 4)
 
-def create_quarterly_uniform_bonus(value, vest_quarters, label='Bonus'):
+def create_quarterly_uniform_bonus(value, vest_quarters, label='Quarterly Bonus'):
     return Bonus(label, value, [1.0/vest_quarters]*vest_quarters, 1)
+
+def create_quarterly_bonus(value, vesting=[1.0], label='Quarterly Bonus'):
+    return Bonus(label, value, vesting, 1)
 
 def create_base_only_level(base, label='Level'):
     return Level(label, base, [])
 
+def create_bonus(bonus : Union[int,Bonus,list]) -> List[Bonus]:
+    if isinstance(bonus, Bonus):
+        return [bonus]
+    if isinstance(bonus, list):
+        result = []
+        for b in bonus:
+            result.extend(create_bonus(b))
+        return result
+    if isinstance(bonus, int):
+        return [create_yearly_cash_bonus(bonus)]
+
+
 # A level with a single bonus (most companies)
-def create_simple_level(base, bonus : Union[int,Bonus], label='Level'):
-    if not isinstance(bonus, Bonus):
-        bonus = create_yearly_cash_bonus(bonus, label)
-    return Level(label, base, [bonus])
+def create_simple_level(base, bonus, label='Level'):
+    return Level(label, base, create_bonus(bonus))
 
 # Create an offer 
 def create_offer(label, levels : List[Level], promotions : List[int], sign_bonus: Union[int,Bonus]):
