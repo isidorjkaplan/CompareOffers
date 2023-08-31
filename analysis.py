@@ -72,7 +72,7 @@ def calc_future_value(cashflow, interest_rate : float) -> List[float]:
         cum += value 
         # Record it
         result.append(cum)
-    return result
+    return np.array(result)
 
 from collections import namedtuple
 Result = namedtuple('Result', 'offer city raw_cashflow taxed_cashflow savings_cashflow net_worth')
