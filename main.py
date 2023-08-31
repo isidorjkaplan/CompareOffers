@@ -4,7 +4,7 @@ from analysis import evaluate, scale_result
 from plot import *
 
 def main():
-    # City Guestimates (rent + col)
+    # City Guestimates (rent + col) in local currency
     # # rent is 2bdrm https://www.zumper.com/rent-research 
     # col is https://www.numbeo.com/cost-of-living/city-estimator
     city_chicago = City('Chicago', (2.795 + 2.770)*12, taxes.calc_chicago_total_tax)
@@ -17,26 +17,49 @@ def main():
     # Some constants that I will use for evaluating all the offers   
     params = {
         "start_quarter":2,    # Start at beginning of Q3 since graduate then
-        "interest_rate":0.05, #Assumed real-return interest rate on net-worth investments
-        "years":6,           # How many years to simulate
+        "interest_rate":0.03, #Assumed real-return interest rate on net-worth investments
+        "years":4,           # How many years to simulate
     } 
 
     cad_to_usd = 0.73473
-
-    google_vest_arr = [0.38, 0.32, 0.20, 0.10]
     
-    results = [
+    plot_results([
 
-        evaluate(create_offer("Google", [
-            create_simple_level(label="L3", base=145, bonus=create_yearly_vested_bonus(50, google_vest_arr)),
-            create_simple_level(label="L4", base=175, bonus=create_yearly_vested_bonus(95, google_vest_arr)),
-            create_simple_level(label="L5", base=205, bonus=create_yearly_vested_bonus(168, google_vest_arr)),
-            create_simple_level(label="L6", base=248, bonus=create_yearly_vested_bonus(300, google_vest_arr)),
-        ], [1,2,2], sign_bonus=10), city_seattle,  **params),
+        evaluate(create_simple_offer("A", base=200, bonus=create_quarterly_uniform_bonus(100 / 4, 8), sign_bonus=100), city_nyc, **params),
+        
 
-    ]
-
-    plot_results(results)
+        evaluate(create_simple_offer("B", base=200, bonus=100, sign_bonus=100), city_chicago, **params),  
+    ] + [
+        # GOOGLE
+        evaluate(create_offer("Example FAANG style offer", levels=[
+            create_simple_level(label=label, base=base, bonus=create_yearly_vested_bonus(bonus_val, [0.38, 0.32, 0.20, 0.10]))
+            for (label, base, bonus_val) in [
+                ("L3", 145, 50),
+                ("L4", 175, 95),
+                ("L5", 205, 168),
+                ("L6", 248, 300),
+            ]
+        ], promotions=[1,2,3], sign_bonus=10), city,  **params)
+        for city in [city_sf]
+    ] + [
+        # INTEL
+        scale_result(evaluate(
+                create_offer("Example Canadian Company", levels=[
+                    create_simple_level(label=label, base=base, bonus=[
+                        [
+                            create_yearly_cash_bonus  (base * 3.3/100),         # APB as pct of base
+                            create_quarterly_bonus    (base * 5.5/100/4 ),      # QPB as a pct of base
+                            create_yearly_vested_bonus(rsu_grant, [1/3.0]*3)    # RSU stock grants
+                        ]
+                    ])
+                    for (label, base, rsu_grant) in [
+                        ("L5", 100, 5),
+                        ("L6", 125, 12),
+                        ("L7", 143, 23),
+                    ]
+                ], promotions=[1,1], sign_bonus=10), 
+        city_toronto,  **params), cad_to_usd),
+    ])
     pass
 
 if __name__ == "__main__":
