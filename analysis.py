@@ -6,13 +6,14 @@ import taxes
 import numpy as np
 
 # Superimpose one cashflow onto another starting at start_pos
-def grant_bonus(result, bonus : Bonus, grant_pos=0):
+def grant_bonus(result, bonus : Bonus, grant_pos=0, level_pos_start=0):
     assert isinstance(bonus, Bonus)
+    face_value = bonus.face_value * pow(1 + bonus.raise_pct, (grant_pos-level_pos_start)/4)
     pos = grant_pos
     for pct in bonus.quarterly_vesting:
         if pos >= len(result):
             break
-        result[pos] += pct*bonus.face_value
+        result[pos] += pct*face_value
         pos+=1
     
 # Conert an offer into a series of quarterly cashflows
@@ -38,9 +39,9 @@ def gen_raw_offer_cashflow(offer : Offer, years : int, start_quarter : int = 0) 
                     if first_grant and level_num==0 and start_quarter != 0:
                         # EDGE CASE: Scale down first bonus grant by percentage of the bonus period we worked
                         # i.e, if we start half-way through the year only get half of the first yearly bonus target
-                        grant_bonus(result, Bonus(bonus.label, bonus.face_value * (grant_pos-start_quarter)/bonus.grant_freq, bonus.quarterly_vesting, None), grant_pos)
+                        grant_bonus(result, Bonus(bonus.label, bonus.face_value * (grant_pos-start_quarter)/bonus.grant_freq, bonus.quarterly_vesting, None, 0), grant_pos, pos)
                     else:
-                        grant_bonus(result, bonus, grant_pos )
+                        grant_bonus(result, bonus, grant_pos, pos )
                     first_grant = False
                     pass
         pos = next_pos
