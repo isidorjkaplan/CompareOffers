@@ -3,7 +3,7 @@ from offer import Bonus, Offer, Level, City
 import taxes
 import numpy as np
 from typing import List
-from analysis import Result 
+from analysis import Result, annualize
 from matplotlib import pyplot as plt
 
 # A global that someone can just set
@@ -25,9 +25,6 @@ def plot_values(values, title='plot', names = None, x_scalar=1):
     plt.grid(True)
     plt.title(title)
     pass
-
-def annualize(arr, agg_func = np.sum) -> list:
-    return [agg_func(arr[i:(i+4)]) for i in range(0, len(arr), 4)]
 
 def plot_results(results : List[Result]):
     noffers = len(results)
@@ -60,10 +57,12 @@ def plot_results(results : List[Result]):
         title='Average Tax Rate')
 
     plt.subplot(338)
-    plot_values([[100 * taxes.calc_marginal_rate(result.city.tax_func, x) for x in annualize(result.raw_cashflow)] for result in results], 
-        title='Marginal Tax Rate')
+    #plot_values([[100 * taxes.calc_marginal_rate(result.city.tax_func, x) for x in annualize(result.raw_cashflow)] for result in results], title='Marginal Tax Rate')
+    plot_values([1000*result.eff_hourly for result in results], title='Effective Hourly Savings')
+    plt.ylabel('Dollers')
 
     plt.subplot(339)
+    plt.ylabel("Percentage")
     plot_values([100*np.array(annualize(result.savings_cashflow))/np.array(annualize(result.taxed_cashflow)) for result in results], 
         title='Savings Rate ( savings / taxed TC )')
 

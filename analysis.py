@@ -32,6 +32,7 @@ def gen_raw_offer_cashflow(offer : Offer, years : int, start_quarter : int = 0) 
         result[pos : next_pos] += level.base/4
         # Apply bonus for entire time at this level
         for bonus in level.bonus_arr:
+            num_grants = 0
             bonus : Bonus
             first_grant = True
             for grant_pos in range(pos, next_pos):
@@ -39,11 +40,16 @@ def gen_raw_offer_cashflow(offer : Offer, years : int, start_quarter : int = 0) 
                     if first_grant and level_num==0 and start_quarter != 0:
                         # EDGE CASE: Scale down first bonus grant by percentage of the bonus period we worked
                         # i.e, if we start half-way through the year only get half of the first yearly bonus target
-                        grant_bonus(result, Bonus(bonus.label, bonus.face_value * (grant_pos-start_quarter)/bonus.grant_freq, bonus.quarterly_vesting, None, 0), grant_pos, pos)
+                        grant_bonus(result, Bonus(bonus.label, bonus.face_value * (grant_pos-start_quarter)/bonus.grant_freq, bonus.quarterly_vesting, None, 0, 1), grant_pos, pos)
+                        num_grants+=1
                     else:
                         grant_bonus(result, bonus, grant_pos, pos )
+                        num_grants+=1
                     first_grant = False
                     pass
+                # If this bonus is only given a certain amount of times
+                if bonus.num_grants is not None and num_grants >= bonus.num_grants:
+                    break
         pos = next_pos
         
     return result
@@ -76,7 +82,11 @@ def calc_future_value(cashflow, interest_rate : float) -> List[float]:
     return np.array(result)
 
 from collections import namedtuple
-Result = namedtuple('Result', 'offer city raw_cashflow taxed_cashflow savings_cashflow net_worth')
+Result = namedtuple('Result', 'offer city raw_cashflow taxed_cashflow savings_cashflow net_worth eff_hourly')
+
+def annualize(arr, agg_func = np.sum) -> list:
+    return [agg_func(arr[i:(i+4)]) for i in range(0, len(arr), 4)]
+
 
 # Evaluate an offer in a given city under some specified conditions
 def evaluate(offer : Offer, city : City, interest_rate = 0, years : int = 5, start_quarter : int = 0):
@@ -84,7 +94,12 @@ def evaluate(offer : Offer, city : City, interest_rate = 0, years : int = 5, sta
     taxed_cashflow = apply_taxes(raw_cashflow, city)
     savings_cashflow = apply_col(taxed_cashflow, city, start_quarter)
     net_worth = calc_future_value(savings_cashflow, interest_rate)
-    return Result(offer, city, raw_cashflow, taxed_cashflow, savings_cashflow, net_worth)
+
+    days_per_week = 5
+    eff_hourly = np.array(annualize(savings_cashflow)) / (offer.weekly_hours * (days_per_week*52 - offer.num_pto)/days_per_week )
+    eff_hourly[0] /= ((4-start_quarter)/4) # Only worked part of the year
+    
+    return Result(offer, city, raw_cashflow, taxed_cashflow, savings_cashflow, net_worth, eff_hourly)
     pass
 
 def scale_offer(offer : Offer, factor : float) -> Offer:
