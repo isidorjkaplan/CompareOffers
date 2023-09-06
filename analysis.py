@@ -111,5 +111,5 @@ def scale_city(city : City, factor : float) -> City:
 
 # Scale all fields of an offer by an scalar multiple, useful for currency conversions
 def scale_result(result : Result, factor : float) -> Result:
-    return Result(scale_offer(result.offer, factor), scale_city(result.city, factor), np.array(result.raw_cashflow)*factor, factor*np.array(result.taxed_cashflow), factor*np.array(result.savings_cashflow), factor*np.array(result.net_worth))
+    return Result(scale_offer(result.offer, factor), scale_city(result.city, factor), np.array(result.raw_cashflow)*factor, factor*np.array(result.taxed_cashflow), factor*np.array(result.savings_cashflow), factor*np.array(result.net_worth), result.eff_hourly*factor)
     pass
