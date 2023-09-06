@@ -38,7 +38,7 @@ def plot_results(results : List[Result]):
     plot_values([result.savings_cashflow for result in results], title='Net Savings (quarterly)', x_scalar=4)
 
     plt.subplot(333)
-    plot_values([result.net_worth/results[0].net_worth for result in results], title='Net Worth Normalized (yearly)',names=labels, x_scalar=4)
+    plot_values([result.net_worth/results[0].net_worth for result in results], title='Net Worth Normalized (yearly)', x_scalar=4)
     plt.ylabel("Versus %s" % labels[0])
    
     plt.subplot(334)
