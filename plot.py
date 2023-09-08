@@ -35,6 +35,7 @@ def plot_results(results : List[Result]):
     plt.ylabel("$1,000")
 
     plt.subplot(332)
+    plt.ylabel("$1,000")
     plot_values([result.savings_cashflow for result in results], title='Net Savings (quarterly)', x_scalar=4)
 
     plt.subplot(333)
@@ -46,9 +47,11 @@ def plot_results(results : List[Result]):
     plot_values([annualize(result.raw_cashflow) for result in results], title='Raw TC (yearly)')
 
     plt.subplot(335)
+    plt.ylabel("$1,000")
     plot_values([annualize(result.taxed_cashflow) for result in results], title='After-Tax TC (yearly)')
 
     plt.subplot(336)
+    plt.ylabel("$1,000")
     plot_values([annualize(result.savings_cashflow) for result in results], title='Net Savings (yearly)')
 
     plt.subplot(337)
