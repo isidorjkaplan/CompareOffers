@@ -12,7 +12,7 @@ import numpy as np
 #   grant_freq: Granted every grant_freq quarters. I.e put 4 for yearly and 2 for half-yearly and 1 for quarterly granted
 #   raise_pct: A percentage [0,1] that your bonus goes up by annually
 #   num_grants: Use this to make the bonus stop after being granted some number of times. Useful for garunteed bonus that may not be recieved again
-Bonus = namedtuple('Bonus', 'label face_value quarterly_vesting grant_freq raise_pct num_grants')
+Bonus = namedtuple('Bonus', 'label face_value quarterly_vesting grant_freq raise_pct num_grants prorated_start')
 # A tuple of your base and target bonus
 #   label: What is the name of your promotion level
 #   base: What is your annual base salary
@@ -32,24 +32,24 @@ City = namedtuple('City', 'label yearly_col tax_func')
 # FACTORY FUNCTIONS FOR COMMON STUFF
 
 # Create the Bonus representation from a bonus granted yearly in January
-def create_yearly_vested_bonus(face_value, yearly_vesting, raise_pct=0, num_grants=None, label='Vested Bonus'):
+def create_yearly_vested_bonus(face_value, yearly_vesting, raise_pct=0, num_grants=None, prorated_start=True, label='Vested Bonus'):
     quarterly_vesting = []
     for pct in yearly_vesting:
         quarterly_vesting.extend([pct, 0, 0, 0])
-    return Bonus(label, face_value, quarterly_vesting, 4, raise_pct, num_grants)
+    return Bonus(label, face_value, quarterly_vesting, 4, raise_pct, num_grants, prorated_start)
 
 def create_sign_bonus(value, raise_pct=0, num_grants=None, label='Sign Bonus'):
-    return Bonus(label, value, [1.0], None, raise_pct, num_grants)
+    return Bonus(label, value, [1.0], None, raise_pct, num_grants, False)
 
 # Create a bonus that is granted once per year 
-def create_yearly_cash_bonus(value, raise_pct=0, num_grants=None, label='Annual Cash Bonus'):
-    return Bonus(label, value, [1.0], 4, raise_pct, num_grants)
+def create_yearly_cash_bonus(value, raise_pct=0, num_grants=None, prorated_start=True, label='Annual Cash Bonus'):
+    return Bonus(label, value, [1.0], 4, raise_pct, num_grants, prorated_start)
 
-def create_quarterly_uniform_bonus(value, vest_quarters, raise_pct=0, num_grants=None, label='Quarterly Bonus'):
-    return Bonus(label, value, [1.0/vest_quarters]*vest_quarters, 1, raise_pct, num_grants)
+def create_quarterly_uniform_bonus(value, vest_quarters, raise_pct=0, num_grants=None, prorated_start=False, label='Quarterly Bonus'):
+    return Bonus(label, value, [1.0/vest_quarters]*vest_quarters, 1, raise_pct, num_grants, prorated_start)
 
-def create_quarterly_bonus(value, vesting=[1.0], raise_pct=0, num_grants=None, label='Quarterly Bonus'):
-    return Bonus(label, value, vesting, 1, raise_pct, num_grants)
+def create_quarterly_bonus(value, vesting=[1.0], raise_pct=0, num_grants=None, prorated_start=False, label='Quarterly Bonus'):
+    return Bonus(label, value, vesting, 1, raise_pct, num_grants, prorated_start)
 
 def create_hrt_bonus(total_amount, threshold, raise_pct=0, num_grants=None, label='Bonus'):
     initial_amount = min(total_amount, threshold)
@@ -60,7 +60,7 @@ def create_hrt_bonus(total_amount, threshold, raise_pct=0, num_grants=None, labe
     vesting *= (quarterly_value / total_amount)
     # Add the initial threshold amount
     vesting[0] += (initial_amount / total_amount)
-    return Bonus(label, total_amount, vesting, 1, raise_pct, num_grants)
+    return Bonus(label, total_amount, vesting, 1, raise_pct, num_grants, False)
     pass
 
 def create_base_only_level(base, label='Level'):

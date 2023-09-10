@@ -42,10 +42,10 @@ def gen_raw_offer_cashflow(offer : Offer, years : int, start_quarter : float = 2
             first_grant = True
             for grant_pos in range(pos, next_pos):
                 if grant_pos % bonus.grant_freq == 0 and grant_pos != 0:
-                    if first_grant and level_num==0 and start_quarter != 0:
+                    if first_grant and bonus.prorated_start and level_num==0 and start_quarter != 0:
                         # EDGE CASE: Scale down first bonus grant by percentage of the bonus period we worked
                         # i.e, if we start half-way through the year only get half of the first yearly bonus target
-                        grant_bonus(result, Bonus(bonus.label, bonus.face_value * (grant_pos-start_quarter)/bonus.grant_freq, bonus.quarterly_vesting, None, 0, 1), grant_pos, pos)
+                        grant_bonus(result, Bonus(bonus.label, bonus.face_value * (grant_pos-start_quarter)/bonus.grant_freq, bonus.quarterly_vesting, None, 0, 1, False), grant_pos, pos)
                         num_grants+=1
                     else:
                         grant_bonus(result, bonus, grant_pos, pos )
