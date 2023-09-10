@@ -4,6 +4,7 @@ from collections import namedtuple
 from typing import List
 import taxes
 import numpy as np
+import math
 
 # Superimpose one cashflow onto another starting at start_pos
 def grant_bonus(result, bonus : Bonus, grant_pos=0, level_pos_start=0):
@@ -17,12 +18,12 @@ def grant_bonus(result, bonus : Bonus, grant_pos=0, level_pos_start=0):
         pos+=1
     
 # Conert an offer into a series of quarterly cashflows
-def gen_raw_offer_cashflow(offer : Offer, years : int, start_quarter : int = 0) -> np.ndarray:
+def gen_raw_offer_cashflow(offer : Offer, years : int, start_quarter : float = 2) -> np.ndarray:
     print("Generating offer raw cashflow: %s" % offer.label)
     result = np.zeros((years*4,))
-    grant_bonus(result, offer.sign_bonus, start_quarter)
+    grant_bonus(result, offer.sign_bonus, int(start_quarter))
     N = len(result)
-    pos = start_quarter
+    pos = int(start_quarter)
     for level_num,duration in enumerate(offer.promotion + [years]):
         if pos >= N: break
         level : Level = offer.levels[level_num]
@@ -30,6 +31,10 @@ def gen_raw_offer_cashflow(offer : Offer, years : int, start_quarter : int = 0) 
         # Apply base salary for entire time we spend at this level
         next_pos = min((pos+duration*4), N)
         result[pos : next_pos] += level.base/4
+         # Scale down base for first quarter by pct of time worked in that quarter
+        if level_num==0 and start_quarter != pos:
+            result[pos] *= (start_quarter-pos)
+
         # Apply bonus for entire time at this level
         for bonus in level.bonus_arr:
             num_grants = 0
@@ -64,7 +69,10 @@ def apply_taxes(result, city : City) -> np.ndarray:
 # Apply taxes and cost of living to a cashflow
 def apply_col(result, city : City, start_quarter) -> np.ndarray:
     result = np.copy(result)
-    result[start_quarter:] -= city.yearly_col/4
+    # All future quarters including maybe the first one
+    result[math.ceil(start_quarter):] -= city.yearly_col/4
+    # If start_quarter is floating point then account for fraction of costs during that quarter
+    result[int(start_quarter)] -= (start_quarter-int(start_quarter))*city.yearly_col/4
     return result 
 
 # Generate the net-worth of a cash-flow at each time interval under some assumed interest rate
@@ -89,7 +97,7 @@ def annualize(arr, agg_func = np.sum) -> list:
 
 
 # Evaluate an offer in a given city under some specified conditions
-def evaluate(offer : Offer, city : City, interest_rate = 0, years : int = 5, start_quarter : int = 0):
+def evaluate(offer : Offer, city : City, interest_rate = 0, years : int = 5, start_quarter : float = 2):
     raw_cashflow = gen_raw_offer_cashflow(offer, years, start_quarter)
     taxed_cashflow = apply_taxes(raw_cashflow, city)
     savings_cashflow = apply_col(taxed_cashflow, city, start_quarter)
